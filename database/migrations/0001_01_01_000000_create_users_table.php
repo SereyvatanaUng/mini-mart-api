@@ -17,8 +17,16 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->enum('role', ['shop_owner', 'cashier'])->default('cashier');
+            $table->string('phone')->nullable();
+            $table->unsignedBigInteger('shop_owner_id')->nullable(); // For cashiers
+            $table->boolean('is_active')->default(true);
             $table->rememberToken();
             $table->timestamps();
+            $table->softDeletes();
+            
+            $table->foreign('shop_owner_id')->references('id')->on('users');
+            $table->index(['role', 'is_active']);
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
