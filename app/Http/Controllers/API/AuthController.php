@@ -17,6 +17,57 @@ use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
+    public function signup(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
+            'phone' => 'nullable|string|max:20',
+        ]);
+
+        try {
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'phone' => $request->phone,
+                'role' => 'user', // Default role for public signup
+                'is_active' => true,
+            ]);
+
+            // Create token for immediate login after signup
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            // Log successful signup
+            Log::info('New user signed up:', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'name' => $user->name
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Account created successfully',
+                'data' => [
+                    'user' => $user,
+                    'token' => $token,
+                    'token_type' => 'Bearer'
+                ]
+            ], 201);
+        } catch (\Exception $e) {
+            Log::error('User signup failed:', [
+                'email' => $request->email,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Account creation failed',
+                'error' => config('app.debug') ? $e->getMessage() : 'Registration error'
+            ], 500);
+        }
+    }
     public function login(Request $request)
     {
         $request->validate([

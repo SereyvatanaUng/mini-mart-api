@@ -30,16 +30,16 @@ class ProductController extends Controller
             // Search functionality - improved to search in category and location
             if ($request->has('search') && !empty($request->search)) {
                 $search = $request->search;
-                $query->where(function($q) use ($search) {
+                $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('barcode', 'like', "%{$search}%")
-                      ->orWhere('description', 'like', "%{$search}%")
-                      ->orWhereHas('category', function($categoryQuery) use ($search) {
-                          $categoryQuery->where('name', 'like', "%{$search}%");
-                      })
-                      ->orWhereHas('section', function($sectionQuery) use ($search) {
-                          $sectionQuery->where('name', 'like', "%{$search}%");
-                      });
+                        ->orWhere('barcode', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%")
+                        ->orWhereHas('category', function ($categoryQuery) use ($search) {
+                            $categoryQuery->where('name', 'like', "%{$search}%");
+                        })
+                        ->orWhereHas('section', function ($sectionQuery) use ($search) {
+                            $sectionQuery->where('name', 'like', "%{$search}%");
+                        });
                 });
             }
 
@@ -79,7 +79,7 @@ class ProductController extends Controller
             // Sorting
             $sortBy = $request->get('sort_by', 'name');
             $sortOrder = $request->get('sort_order', 'asc');
-            
+
             $allowedSortFields = ['name', 'price', 'stock_quantity', 'created_at', 'updated_at'];
             if (in_array($sortBy, $allowedSortFields)) {
                 $query->orderBy($sortBy, $sortOrder);
@@ -111,7 +111,6 @@ class ProductController extends Controller
                     'low_stock' => $request->low_stock ?? null,
                 ]
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -126,89 +125,48 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        try {
-            // Check if user is shop owner
-            if (!$request->user()->isShopOwner()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Only shop owners can add products'
-                ], 403);
-            }
-
-            // Validation
-            $validator = Validator::make($request->all(), [
-                'name' => 'required|string|max:255',
-                'barcode' => 'nullable|string|unique:products,barcode',
-                'description' => 'nullable|string|max:1000',
-                'price' => 'required|numeric|min:0.01',
-                'cost_price' => 'nullable|numeric|min:0',
-                'stock_quantity' => 'required|integer|min:0',
-                'min_stock_level' => 'required|integer|min:0',
-                'category_id' => 'required|exists:categories,id',
-                'section_id' => 'required|exists:sections,id',
-                'shelf_id' => 'required|exists:shelves,id',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:5120', // 5MB max
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-
-            // Verify shelf belongs to section
-            $shelf = Shelf::where('id', $request->shelf_id)
-                         ->where('section_id', $request->section_id)
-                         ->first();
-            
-            if (!$shelf) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Selected shelf does not belong to the selected section'
-                ], 422);
-            }
-
-            DB::beginTransaction();
-
-            $productData = $request->except('image');
-
-            // Handle image upload
-            if ($request->hasFile('image')) {
-                $image = $request->file('image');
-                $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-                $imagePath = $image->storeAs('products', $imageName, 'public');
-                $productData['image'] = $imagePath;
-            }
-
-            $product = Product::create($productData);
-
-            DB::commit();
-
-            $product->load(['category', 'section', 'shelf']);
-            $product->image_url = $product->image ? asset('storage/' . $product->image) : null;
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Product created successfully',
-                'data' => $product
-            ], 201);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            
-            // Delete uploaded image if product creation failed
-            if (isset($imagePath) && Storage::disk('public')->exists($imagePath)) {
-                Storage::disk('public')->delete($imagePath);
-            }
-
+        if (!$request->user()->isShopOwner()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to create product',
-                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
-            ], 500);
+                'message' => 'Only shop owners can add products'
+            ], 403);
         }
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'barcode' => 'nullable|string|unique:products',
+            'description' => 'nullable|string',
+            'price' => 'required|numeric|min:0',
+            'cost_price' => 'nullable|numeric|min:0',
+            'stock_quantity' => 'required|integer|min:0',
+            'min_stock_level' => 'required|integer|min:0',
+            'category_id' => 'required|exists:categories,id',
+            'section_id' => 'required|exists:sections,id',
+            'shelf_id' => 'required|exists:shelves,id',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image_url' => 'nullable|url|max:500', // External image URL
+        ]);
+
+        $productData = $request->except(['image']);
+
+        // Handle uploaded image
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('products', 'public');
+            $productData['image'] = $imagePath;
+        }
+
+        // Handle image URL (external link)
+        if ($request->filled('image_url')) {
+            $productData['image_url'] = $request->image_url;
+        }
+
+        $product = Product::create($productData);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Product created successfully',
+            'data' => $product->load(['category', 'section', 'shelf'])
+        ], 201);
     }
 
     /**
@@ -218,7 +176,7 @@ class ProductController extends Controller
     {
         try {
             $product = Product::with(['category', 'section', 'shelf'])
-                             ->findOrFail($id);
+                ->findOrFail($id);
 
             // Add computed fields
             $product->is_low_stock = $product->stock_quantity <= $product->min_stock_level;
@@ -231,7 +189,6 @@ class ProductController extends Controller
                 'message' => 'Product retrieved successfully',
                 'data' => $product
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -283,9 +240,9 @@ class ProductController extends Controller
 
             // Verify shelf belongs to section
             $shelf = Shelf::where('id', $request->shelf_id)
-                         ->where('section_id', $request->section_id)
-                         ->first();
-            
+                ->where('section_id', $request->section_id)
+                ->first();
+
             if (!$shelf) {
                 return response()->json([
                     'success' => false,
@@ -323,7 +280,6 @@ class ProductController extends Controller
                 'message' => 'Product updated successfully',
                 'data' => $product
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -370,7 +326,6 @@ class ProductController extends Controller
                 'success' => true,
                 'message' => 'Product deleted successfully'
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -389,16 +344,15 @@ class ProductController extends Controller
     {
         try {
             $categories = Category::where('is_active', true)
-                                ->select('id', 'name', 'description')
-                                ->orderBy('name')
-                                ->get();
-            
+                ->select('id', 'name', 'description')
+                ->orderBy('name')
+                ->get();
+
             return response()->json([
                 'success' => true,
                 'message' => 'Categories retrieved successfully',
                 'data' => $categories
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -415,18 +369,17 @@ class ProductController extends Controller
     {
         try {
             $sections = Section::where('is_active', true)
-                              ->with(['shelves' => function($query) {
-                                  $query->where('is_active', true)->orderBy('level');
-                              }])
-                              ->orderBy('position')
-                              ->get();
-            
+                ->with(['shelves' => function ($query) {
+                    $query->where('is_active', true)->orderBy('level');
+                }])
+                ->orderBy('position')
+                ->get();
+
             return response()->json([
                 'success' => true,
                 'message' => 'Sections retrieved successfully',
                 'data' => $sections
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -443,12 +396,12 @@ class ProductController extends Controller
     {
         try {
             $section = Section::findOrFail($sectionId);
-            
+
             $shelves = Shelf::where('section_id', $sectionId)
-                           ->where('is_active', true)
-                           ->orderBy('level')
-                           ->get();
-            
+                ->where('is_active', true)
+                ->orderBy('level')
+                ->get();
+
             return response()->json([
                 'success' => true,
                 'message' => 'Shelves retrieved successfully',
@@ -457,7 +410,6 @@ class ProductController extends Controller
                     'shelves' => $shelves
                 ]
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -478,9 +430,9 @@ class ProductController extends Controller
             ]);
 
             $product = Product::with(['category', 'section', 'shelf'])
-                             ->where('barcode', $request->barcode)
-                             ->where('is_active', true)
-                             ->first();
+                ->where('barcode', $request->barcode)
+                ->where('is_active', true)
+                ->first();
 
             if (!$product) {
                 return response()->json([
@@ -500,7 +452,6 @@ class ProductController extends Controller
                 'message' => 'Product found',
                 'data' => $product
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -570,7 +521,6 @@ class ProductController extends Controller
                     'current_stock' => $product->stock_quantity
                 ]
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -589,10 +539,10 @@ class ProductController extends Controller
     {
         try {
             $products = Product::with(['category', 'section', 'shelf'])
-                              ->whereColumn('stock_quantity', '<=', 'min_stock_level')
-                              ->where('is_active', true)
-                              ->orderBy('stock_quantity', 'asc')
-                              ->get();
+                ->whereColumn('stock_quantity', '<=', 'min_stock_level')
+                ->where('is_active', true)
+                ->orderBy('stock_quantity', 'asc')
+                ->get();
 
             $products->transform(function ($product) {
                 $product->is_low_stock = true;
@@ -608,7 +558,6 @@ class ProductController extends Controller
                 'data' => $products,
                 'count' => $products->count()
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -644,7 +593,6 @@ class ProductController extends Controller
                     'status' => $product->is_active ? 'activated' : 'deactivated'
                 ]
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -685,30 +633,30 @@ class ProductController extends Controller
                 case 'activate':
                     $affectedCount = Product::whereIn('id', $productIds)->update(['is_active' => true]);
                     break;
-                
+
                 case 'deactivate':
                     $affectedCount = Product::whereIn('id', $productIds)->update(['is_active' => false]);
                     break;
-                
+
                 case 'delete':
                     // Check if any products have sales history
                     $productsWithSales = Product::whereIn('id', $productIds)
-                                               ->whereHas('saleItems')
-                                               ->count();
-                    
+                        ->whereHas('saleItems')
+                        ->count();
+
                     if ($productsWithSales > 0) {
                         return response()->json([
                             'success' => false,
                             'message' => 'Some products have sales history and cannot be deleted'
                         ], 400);
                     }
-                    
+
                     $affectedCount = Product::whereIn('id', $productIds)->delete();
                     break;
-                
+
                 case 'update_category':
                     $affectedCount = Product::whereIn('id', $productIds)
-                                           ->update(['category_id' => $request->category_id]);
+                        ->update(['category_id' => $request->category_id]);
                     break;
             }
 
@@ -723,7 +671,6 @@ class ProductController extends Controller
                     'product_ids' => $productIds
                 ]
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
 

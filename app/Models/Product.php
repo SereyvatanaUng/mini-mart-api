@@ -12,7 +12,7 @@ class Product extends Model
 
     protected $fillable = [
         'name', 'barcode', 'description', 'price', 'cost_price',
-        'stock_quantity', 'min_stock_level', 'image',
+        'stock_quantity', 'min_stock_level', 'image', 'image_url',
         'category_id', 'section_id', 'shelf_id', 'is_active'
     ];
 
@@ -21,6 +21,8 @@ class Product extends Model
         'cost_price' => 'decimal:2',
         'is_active' => 'boolean',
     ];
+
+    protected $appends = ['full_image_url'];
 
     public function category()
     {
@@ -60,5 +62,22 @@ class Product extends Model
     public function isLowStock()
     {
         return $this->stock_quantity <= $this->min_stock_level;
+    }
+
+    // Get full image URL - prioritize image_url, fallback to uploaded image
+    public function getFullImageUrlAttribute()
+    {
+        // If image_url is provided (external link), use it
+        if (!empty($this->image_url)) {
+            return $this->image_url;
+        }
+        
+        // If uploaded image exists, return full URL
+        if (!empty($this->image)) {
+            return asset('storage/' . $this->image);
+        }
+        
+        // Default placeholder image
+        return asset('images/product-placeholder.png');
     }
 }

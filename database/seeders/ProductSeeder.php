@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Product;
 use App\Models\Category;
@@ -18,7 +17,7 @@ class ProductSeeder extends Seeder
         $shelves = Shelf::all();
 
         $products = [
-            // Beverages
+            // Beverages with image URLs
             [
                 'name' => 'Coca Cola 330ml',
                 'barcode' => '0049000028910',
@@ -27,6 +26,7 @@ class ProductSeeder extends Seeder
                 'cost_price' => 0.90,
                 'stock_quantity' => 120,
                 'min_stock_level' => 20,
+                'image_url' => 'https://images.unsplash.com/photo-1629203851122-3726ecdf080e?w=400',
                 'category' => 'Beverages',
                 'section' => 'Front Section A',
                 'shelf_level' => 3,
@@ -39,6 +39,7 @@ class ProductSeeder extends Seeder
                 'cost_price' => 0.85,
                 'stock_quantity' => 100,
                 'min_stock_level' => 20,
+                'image_url' => 'https://images.unsplash.com/photo-1553456558-aff63285bdd1?w=400',
                 'category' => 'Beverages',
                 'section' => 'Front Section A',
                 'shelf_level' => 3,
@@ -51,6 +52,7 @@ class ProductSeeder extends Seeder
                 'cost_price' => 0.45,
                 'stock_quantity' => 200,
                 'min_stock_level' => 50,
+                'image_url' => 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400',
                 'category' => 'Beverages',
                 'section' => 'Front Section A',
                 'shelf_level' => 2,
@@ -63,6 +65,7 @@ class ProductSeeder extends Seeder
                 'cost_price' => 2.50,
                 'stock_quantity' => 45,
                 'min_stock_level' => 10,
+                'image_url' => 'https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?w=400',
                 'category' => 'Beverages',
                 'section' => 'Cold Section D',
                 'shelf_level' => 2,
@@ -75,12 +78,13 @@ class ProductSeeder extends Seeder
                 'cost_price' => 1.80,
                 'stock_quantity' => 75,
                 'min_stock_level' => 15,
+                'image_url' => 'https://images.unsplash.com/photo-1572888962961-75ba26f30d6e?w=400',
                 'category' => 'Beverages',
                 'section' => 'Front Section A',
                 'shelf_level' => 4,
             ],
 
-            // Snacks & Chips
+            // Snacks & Chips with images
             [
                 'name' => 'Lays Classic Chips',
                 'barcode' => '0028400047180',
@@ -89,6 +93,7 @@ class ProductSeeder extends Seeder
                 'cost_price' => 2.10,
                 'stock_quantity' => 60,
                 'min_stock_level' => 15,
+                'image_url' => 'https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=400',
                 'category' => 'Snacks & Chips',
                 'section' => 'Middle Section B',
                 'shelf_level' => 3,
@@ -101,6 +106,7 @@ class ProductSeeder extends Seeder
                 'cost_price' => 2.40,
                 'stock_quantity' => 50,
                 'min_stock_level' => 12,
+                'image_url' => 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=400',
                 'category' => 'Snacks & Chips',
                 'section' => 'Middle Section B',
                 'shelf_level' => 3,
@@ -113,24 +119,13 @@ class ProductSeeder extends Seeder
                 'cost_price' => 1.65,
                 'stock_quantity' => 40,
                 'min_stock_level' => 10,
+                'image_url' => 'https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=400',
                 'category' => 'Snacks & Chips',
                 'section' => 'Middle Section B',
                 'shelf_level' => 2,
             ],
-            [
-                'name' => 'Mixed Nuts 200g',
-                'barcode' => '0041129421051',
-                'description' => 'Roasted mixed nuts, 200g pack',
-                'price' => 4.99,
-                'cost_price' => 3.20,
-                'stock_quantity' => 30,
-                'min_stock_level' => 8,
-                'category' => 'Snacks & Chips',
-                'section' => 'Middle Section B',
-                'shelf_level' => 4,
-            ],
 
-            // Dairy Products
+            // Dairy Products with images
             [
                 'name' => 'Whole Milk 1L',
                 'barcode' => '0070038349815',
@@ -139,6 +134,7 @@ class ProductSeeder extends Seeder
                 'cost_price' => 1.50,
                 'stock_quantity' => 35,
                 'min_stock_level' => 8,
+                'image_url' => 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400',
                 'category' => 'Dairy Products',
                 'section' => 'Cold Section D',
                 'shelf_level' => 2,
@@ -151,24 +147,13 @@ class ProductSeeder extends Seeder
                 'cost_price' => 2.80,
                 'stock_quantity' => 25,
                 'min_stock_level' => 6,
+                'image_url' => 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=400',
                 'category' => 'Dairy Products',
                 'section' => 'Cold Section D',
                 'shelf_level' => 3,
             ],
-            [
-                'name' => 'Greek Yogurt 500g',
-                'barcode' => '0052159200015',
-                'description' => 'Plain Greek yogurt, 500g container',
-                'price' => 3.79,
-                'cost_price' => 2.30,
-                'stock_quantity' => 20,
-                'min_stock_level' => 5,
-                'category' => 'Dairy Products',
-                'section' => 'Cold Section D',
-                'shelf_level' => 1,
-            ],
 
-            // Candy & Sweets
+            // Candy & Sweets with images
             [
                 'name' => 'Snickers Bar',
                 'barcode' => '0040000549352',
@@ -177,6 +162,7 @@ class ProductSeeder extends Seeder
                 'cost_price' => 0.75,
                 'stock_quantity' => 90,
                 'min_stock_level' => 20,
+                'image_url' => 'https://images.unsplash.com/photo-1511381939415-e44015466834?w=400',
                 'category' => 'Candy & Sweets',
                 'section' => 'Counter Section E',
                 'shelf_level' => 1,
@@ -189,88 +175,13 @@ class ProductSeeder extends Seeder
                 'cost_price' => 1.80,
                 'stock_quantity' => 55,
                 'min_stock_level' => 12,
+                'image_url' => 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=400',
                 'category' => 'Candy & Sweets',
                 'section' => 'Counter Section E',
                 'shelf_level' => 2,
             ],
-            [
-                'name' => 'Gummy Bears 250g',
-                'barcode' => '0041420061301',
-                'description' => 'Haribo gummy bears, 250g bag',
-                'price' => 2.49,
-                'cost_price' => 1.45,
-                'stock_quantity' => 40,
-                'min_stock_level' => 10,
-                'category' => 'Candy & Sweets',
-                'section' => 'Middle Section B',
-                'shelf_level' => 1,
-            ],
 
-            // Household Items
-            [
-                'name' => 'Paper Towels 6-Pack',
-                'barcode' => '0037000273912',
-                'description' => 'Absorbent paper towels, 6-roll pack',
-                'price' => 8.99,
-                'cost_price' => 5.50,
-                'stock_quantity' => 25,
-                'min_stock_level' => 5,
-                'category' => 'Household Items',
-                'section' => 'Back Section C',
-                'shelf_level' => 4,
-            ],
-            [
-                'name' => 'Dish Soap 500ml',
-                'barcode' => '0037000326809',
-                'description' => 'Liquid dish washing soap, 500ml bottle',
-                'price' => 2.99,
-                'cost_price' => 1.75,
-                'stock_quantity' => 35,
-                'min_stock_level' => 8,
-                'category' => 'Household Items',
-                'section' => 'Back Section C',
-                'shelf_level' => 2,
-            ],
-            [
-                'name' => 'Toilet Paper 12-Pack',
-                'barcode' => '0037000087519',
-                'description' => 'Soft toilet paper, 12-roll pack',
-                'price' => 12.99,
-                'cost_price' => 8.50,
-                'stock_quantity' => 18,
-                'min_stock_level' => 4,
-                'category' => 'Household Items',
-                'section' => 'Back Section C',
-                'shelf_level' => 3,
-            ],
-
-            // Frozen Foods
-            [
-                'name' => 'Vanilla Ice Cream 1L',
-                'barcode' => '0070330000328',
-                'description' => 'Premium vanilla ice cream, 1 liter tub',
-                'price' => 5.99,
-                'cost_price' => 3.75,
-                'stock_quantity' => 15,
-                'min_stock_level' => 3,
-                'category' => 'Frozen Foods',
-                'section' => 'Cold Section D',
-                'shelf_level' => 1,
-            ],
-            [
-                'name' => 'Frozen Pizza',
-                'barcode' => '0071921000523',
-                'description' => 'Pepperoni frozen pizza, family size',
-                'price' => 6.49,
-                'cost_price' => 4.20,
-                'stock_quantity' => 12,
-                'min_stock_level' => 3,
-                'category' => 'Frozen Foods',
-                'section' => 'Cold Section D',
-                'shelf_level' => 2,
-            ],
-
-            // Personal Care
+            // Personal Care with images
             [
                 'name' => 'Shampoo 400ml',
                 'barcode' => '0030878000258',
@@ -279,6 +190,7 @@ class ProductSeeder extends Seeder
                 'cost_price' => 3.10,
                 'stock_quantity' => 30,
                 'min_stock_level' => 6,
+                'image_url' => 'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=400',
                 'category' => 'Personal Care',
                 'section' => 'Back Section C',
                 'shelf_level' => 1,
@@ -291,6 +203,7 @@ class ProductSeeder extends Seeder
                 'cost_price' => 1.65,
                 'stock_quantity' => 45,
                 'min_stock_level' => 10,
+                'image_url' => 'https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=400',
                 'category' => 'Personal Care',
                 'section' => 'Back Section C',
                 'shelf_level' => 2,
@@ -329,15 +242,16 @@ class ProductSeeder extends Seeder
                 'cost_price' => $productData['cost_price'],
                 'stock_quantity' => $productData['stock_quantity'],
                 'min_stock_level' => $productData['min_stock_level'],
+                'image_url' => $productData['image_url'], // Add image URL
                 'category_id' => $category->id,
                 'section_id' => $section->id,
                 'shelf_id' => $shelf->id,
                 'is_active' => true,
             ]);
 
-            echo "✅ Product created: {$productData['name']} - {$section->name}, Level {$productData['shelf_level']}\n";
+            echo "✅ Product created: {$productData['name']} with image\n";
         }
 
-        echo "\n";
+        echo "\n🎉 All products created with beautiful images!\n";
     }
 }

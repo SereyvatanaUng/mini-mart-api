@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -11,41 +10,22 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+
     protected $fillable = [
         'name', 'email', 'password', 'role', 'phone', 'shop_owner_id', 'is_active'
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
-        'password',
-        'remember_token',
+        'password', 'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'is_active' => 'boolean',
+    ];
 
-     // Relationships
+    // Relationships
     public function cashiers()
     {
         return $this->hasMany(User::class, 'shop_owner_id');
@@ -72,6 +52,11 @@ class User extends Authenticatable
         return $query->where('role', 'cashier');
     }
 
+    public function scopeUsers($query)
+    {
+        return $query->where('role', 'user');
+    }
+
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
@@ -86,5 +71,20 @@ class User extends Authenticatable
     public function isCashier()
     {
         return $this->role === 'cashier';
+    }
+
+    public function isUser()
+    {
+        return $this->role === 'user';
+    }
+
+    public function canManageProducts()
+    {
+        return $this->isShopOwner();
+    }
+
+    public function canMakeSales()
+    {
+        return $this->isShopOwner() || $this->isCashier();
     }
 }
