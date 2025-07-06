@@ -12,7 +12,7 @@ use App\Http\Controllers\API\DashboardController;
 Route::prefix('v1')->group(function () {
     // Public routes (no authentication required)
     Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/signup', [AuthController::class, 'signup']); // NEW: User signup
+    Route::post('/signup', [AuthController::class, 'signup']);
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('/verify-otp', [AuthController::class, 'verifyOTP']);
     Route::post('/reset-password', [AuthController::class, 'resetPassword']);
@@ -25,7 +25,9 @@ Route::prefix('v1')->group(function () {
     // Public store layout browsing (NO AUTH REQUIRED)
     Route::get('/categories', [CategoryController::class, 'index']);
     Route::get('/sections', [SectionController::class, 'index']);
+    Route::get('/sections/{id}', [SectionController::class, 'show']);
     Route::get('/shelves', [ShelfController::class, 'index']);
+    Route::get('/shelves/{id}', [ShelfController::class, 'show']);
     
     // Public helper routes (NO AUTH REQUIRED)
     Route::get('/data/categories', [ProductController::class, 'getCategories']);
